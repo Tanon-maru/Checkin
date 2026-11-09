@@ -57,7 +57,7 @@ input[type=search]{font:inherit;width:100%;padding:12px 14px;border-radius:10px;
 .chip{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;cursor:pointer}
 .chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .list{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);width:100%;text-align:left;background:none;border-left:0;border-right:0;border-bottom:0;font:inherit;color:inherit;cursor:pointer}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line);width:100%;text-align:left;cursor:default}
 .row:first-child{border-top:0}
 .dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--muted)}
 .row.in .dot{background:var(--ok);border-color:var(--ok)}
@@ -136,10 +136,7 @@ function render(){
     return !q||p.name.toLowerCase().includes(q)||p.id.toLowerCase().includes(q)});
   if(filter==='in')rows=rows.slice().sort((a,b)=>b.at-a.at);
   $('#list').innerHTML=rows.length?rows.map(p=>{
-    let act='';
-    if(openId===p.id)act=p.at?`<div class="act"><button class="btn warnb" data-undo="${p.id}" type="button">ยกเลิกการลงทะเบียน</button><button class="btn ghost" data-close type="button">ปิด</button></div>`
-      :`<div class="act"><button class="btn okb" data-in="${p.id}" type="button">ลงทะเบียนเข้างานตอนนี้</button><button class="btn ghost" data-close type="button">ปิด</button></div>`;
-    return `<div class="row ${p.at?'in':''}" tabindex="0" data-id="${p.id}"><span class="dot"></span><span class="who"><div class="n">${esc(p.name)}</div><div class="s">${p.id} · PIN ${esc(p.pin)}</div></span><span class="t">${p.at?p.time:'ยังไม่มา'}</span>${act}</div>`;
+    return `<div class="row ${p.at?'in':''}"><span class="dot"></span><span class="who"><div class="n">${esc(p.name)}</div><div class="s">${p.id} · PIN ${esc(p.pin)}</div></span><span class="t">${p.at?p.time:'ยังไม่มา'}</span></div>`;
   }).join(''):'<div class="empty">ไม่พบรายชื่อที่ตรงกัน</div>';
 }
 function showResult(kind,p,extra){
@@ -199,11 +196,6 @@ $('#scanBtn').addEventListener('click',async()=>{if(live)return;
 
 $('#q').addEventListener('input',render);
 document.querySelectorAll('.chip').forEach(b=>b.addEventListener('click',()=>{filter=b.dataset.f;document.querySelectorAll('.chip').forEach(x=>x.setAttribute('aria-pressed',x===b));render()}));
-$('#list').addEventListener('click',e=>{const t=e.target;
-  if(t.dataset.in){openId=null;checkIn(t.dataset.in,'manual');return}
-  if(t.dataset.undo){undo(t.dataset.undo);return}
-  if(t.hasAttribute('data-close')){openId=null;render();return}
-  const row=t.closest('.row');if(!row)return;openId=openId===row.dataset.id?null:row.dataset.id;render()});
 
 let timer=0;
 function start(){setStatus('กำลังโหลดรายชื่อ…');refresh();clearInterval(timer);timer=setInterval(()=>{if(!document.hidden)refresh()},10000)}
